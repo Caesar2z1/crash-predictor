@@ -1,0 +1,80 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Crash Predictor</title>
+  <style>
+    body { font-family: Arial; margin: 40px; }
+    textarea, input { width: 100%; padding: 8px; margin: 5px 0; }
+    button { padding: 10px 20px; font-size: 16px; }
+    #results { margin-top: 20px; }
+  </style>
+</head>
+<body>
+
+  <h2>Cash or Crash Predictor</h2>
+
+  <p>Enter past data (format: HH:MM, multiplier):</p>
+  <textarea id="dataInput" rows="10" placeholder="e.g. 18:39, 5.11"></textarea>
+
+  <p>Current Time (HH:MM):</p>
+  <input id="currentTime" placeholder="e.g. 18:40" />
+
+  <button onclick="predict()">Predict Next 5 Values</button>
+
+  <div id="results"></div>
+
+  <script>
+    function toBucket(timeStr) {
+      const [h, m] = timeStr.split(":").map(Number);
+      return `${String(h).padStart(2, '0')}:${String(Math.floor(m / 5) * 5).padStart(2, '0')}`;
+    }
+
+    function predict() {
+      const input = document.getElementById("dataInput").value.trim();
+      const currentTime = document.getElementById("currentTime").value.trim();
+      const lines = input.split("\n");
+
+      const buckets = {};
+
+      lines.forEach(line => {
+        const [time, valueStr] = line.split(",").map(s => s.trim());
+        const value = parseFloat(valueStr);
+        if (!isNaN(value)) {
+          const bucket = toBucket(time);
+          if (!buckets[bucket]) buckets[bucket] = [];
+          buckets[bucket].push(value);
+        }
+      });
+
+      const currentBucket = toBucket(currentTime);
+      const values = buckets[currentBucket] || [];
+      const results = [];
+
+      for (let i = 0; i < 5; i++) {
+        if (values.length === 0) {
+          results.push(randomInRange(1.01, 3.00));
+        } else {
+          const avg = values.reduce((a, b) => a + b, 0) / values.length;
+          if (avg > 10) {
+            results.push(randomInRange(5.0, 25.0));
+          } else if (avg > 3) {
+            results.push(randomInRange(2.0, 9.0));
+          } else {
+            results.push(randomInRange(1.01, 3.0));
+          }
+        }
+      }
+
+      document.getElementById("results").innerHTML =
+        "<h3>Predicted Multipliers:</h3><p>" +
+        results.map(x => x.toFixed(2)).join(", ") +
+        "</p>";
+    }
+
+    function randomInRange(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+  </script>
+</body>
+</html>
