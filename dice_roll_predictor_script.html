@@ -1,0 +1,55 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dice Roll Predictor Script</title>
+</head>
+<body>
+    <h1>Dice Roll Predictor Script</h1>
+    <p>This is a Python script that predicts the next dice roll based on previous outcomes and assigned probabilities.</p>
+
+    <pre>
+import random
+
+# Given probabilities
+prob_2_6 = 0.45  # 45% chance for outcomes between 2 and 6
+prob_8_12 = 0.34  # 34% chance for outcomes between 8 and 12
+prob_7 = 0.12  # 12% chance for outcome of 7
+
+# Historical rolls (as provided)
+historical_rolls = [11, 10, 9]  # Previous 3 rolls
+
+# Function to predict next roll based on last 3 rolls
+def predict_next_roll(historical_rolls):
+    # Calculate frequencies of rolls in each category (2-6, 8-12, 7)
+    prob_2_6_count = sum(1 for x in historical_rolls if 2 <= x <= 6) / 3
+    prob_8_12_count = sum(1 for x in historical_rolls if 8 <= x <= 12) / 3
+    prob_7_count = sum(1 for x in historical_rolls if x == 7) / 3
+    
+    # Calculate weighted probabilities
+    weighted_prob_2_6 = prob_2_6 * prob_2_6_count
+    weighted_prob_8_12 = prob_8_12 * prob_8_12_count
+    weighted_prob_7 = prob_7 * prob_7_count
+    
+    # Normalize to get total weight
+    total_weight = weighted_prob_2_6 + weighted_prob_8_12 + weighted_prob_7
+    weighted_prob_2_6 /= total_weight
+    weighted_prob_8_12 /= total_weight
+    weighted_prob_7 /= total_weight
+    
+    # Generate the next roll based on the weighted probabilities
+    next_roll = random.choices([7, 8, 9, 10, 11, 12, 2, 3, 4, 5, 6], 
+                               weights=[weighted_prob_7, weighted_prob_8_12, weighted_prob_8_12, 
+                                        weighted_prob_8_12, weighted_prob_8_12, weighted_prob_8_12, 
+                                        weighted_prob_2_6, weighted_prob_2_6, weighted_prob_2_6, 
+                                        weighted_prob_2_6, weighted_prob_2_6], k=1)
+    return next_roll[0]
+
+# Predict the next roll based on the previous 3 rolls
+predicted_roll = predict_next_roll(historical_rolls)
+print(f"Predicted next roll: {predicted_roll}")
+    </pre>
+</body>
+</html>
